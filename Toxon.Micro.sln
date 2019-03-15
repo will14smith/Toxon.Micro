@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.489
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toxon.Micro", "Toxon.Micro\Toxon.Micro.csproj", "{2DCDC78C-2D55-4EFC-B19F-2CEE14D0C0D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toxon.Micro.Example", "Toxon.Micro.Example\Toxon.Micro.Example.csproj", "{43C32AF6-B439-40BF-BC1B-42AAF4286E84}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2DCDC78C-2D55-4EFC-B19F-2CEE14D0C0D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DCDC78C-2D55-4EFC-B19F-2CEE14D0C0D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DCDC78C-2D55-4EFC-B19F-2CEE14D0C0D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DCDC78C-2D55-4EFC-B19F-2CEE14D0C0D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43C32AF6-B439-40BF-BC1B-42AAF4286E84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43C32AF6-B439-40BF-BC1B-42AAF4286E84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43C32AF6-B439-40BF-BC1B-42AAF4286E84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43C32AF6-B439-40BF-BC1B-42AAF4286E84}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AE60791E-A26F-4C28-8EDA-82925373EA2E}
+	EndGlobalSection
+EndGlobal
