@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Toxon.Micro.Routing
@@ -16,9 +17,22 @@ namespace Toxon.Micro.Routing
             Equality = equality;
         }
 
-        public bool Matches(object value)
+        public MatchResult Matches(object value)
         {
-            return Equality.Equals(MatchValue, value);
+            if (!Equality.Equals(MatchValue, value))
+            {
+                return MatchResult.NoMatch;
+            }
+
+            return new EqualityValueMatchResult();
+        }
+
+        private class EqualityValueMatchResult : MatchResult
+        {
+            public override bool IsBetterMatchThan(MatchResult other)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

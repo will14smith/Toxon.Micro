@@ -15,9 +15,9 @@ namespace Toxon.Micro.Routing
             FieldValue = fieldValue;
         }
 
-        public bool Matches(IRequest request)
+        public MatchResult Matches(IRequest request)
         {
-            if (request is null) return false;
+            if (request is null) return MatchResult.NoMatch;
 
             object requestFieldValue;
 
@@ -36,11 +36,17 @@ namespace Toxon.Micro.Routing
                 }
                 else
                 {
-                    return false;
+                    return MatchResult.NoMatch;
                 }
             }
 
-            return FieldValue.Matches(requestFieldValue);
+            var fieldMatch = FieldValue.Matches(requestFieldValue);
+            if (!fieldMatch.Matched)
+            {
+                return MatchResult.NoMatch;
+            }
+
+            return new FieldMatchResult(FieldName, fieldMatch);
         }
 
         private FieldInfo GetField(Type type)
@@ -55,6 +61,23 @@ namespace Toxon.Micro.Routing
         private bool FieldNameMatches(string fieldName)
         {
             return FieldName.Equals(fieldName, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        private class FieldMatchResult : MatchResult
+        {
+            private readonly string _fieldName;
+            private readonly MatchResult _fieldMatch;
+
+            public FieldMatchResult(string fieldName, MatchResult fieldMatch)
+            {
+                _fieldName = fieldName;
+                _fieldMatch = fieldMatch;
+            }
+
+            public override bool IsBetterMatchThan(MatchResult other)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

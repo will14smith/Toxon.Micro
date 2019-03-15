@@ -2,6 +2,6 @@
 {
     public interface IRequestMatcher
     {
-        bool Matches(IRequest request);
+        MatchResult Matches(IRequest request);
     }
 }

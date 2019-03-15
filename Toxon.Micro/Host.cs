@@ -37,9 +37,32 @@ namespace Toxon.Micro
 
         public Task<IResponse> Act(IRequest request)
         {
-            var handler = _handlers.Single(x => x.RequestMatcher.Matches(request));
+            RequestHandler chosenHandler = null;
+            MatchResult chosenHandlerMatch = null;
 
-            return handler.Handler(request);
+            foreach (var handler in _handlers)
+            {
+                var handlerMatch = handler.RequestMatcher.Matches(request);
+                if (!handlerMatch.Matched)
+                {
+                    continue;
+                }
+
+                if (chosenHandler != null && !handlerMatch.IsBetterMatchThan(chosenHandlerMatch))
+                {
+                    continue;
+                }
+
+                chosenHandler = handler;
+                chosenHandlerMatch = handlerMatch;
+            }
+
+            if (chosenHandler == null)
+            {
+                throw new Exception("Handler not found");
+            }
+
+            return chosenHandler.Handler(request);
         }
         public async Task<TResponse> Act<TResponse>(IRequest request)
             where TResponse : IResponse

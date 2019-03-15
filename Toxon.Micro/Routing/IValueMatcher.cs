@@ -2,6 +2,6 @@
 {
     public interface IValueMatcher
     {
-        bool Matches(object value);
+        MatchResult Matches(object value);
     }
 }
