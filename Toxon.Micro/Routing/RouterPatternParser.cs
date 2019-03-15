@@ -14,7 +14,13 @@ namespace Toxon.Micro.Routing
                 var key = parts[0].Trim();
                 var value = parts[1].Trim();
 
-                var valueMatcher = value == "*" ? (IValueMatcher) new AnyValueMatcher() : new EqualityValueMatcher(value);
+                IValueMatcher valueMatcher;
+                if (value == "*")
+                    valueMatcher = new AnyValueMatcher();
+                else if (value.Contains("*"))
+                    valueMatcher = new WildcardValueMatcher(value);
+                else
+                    valueMatcher = new EqualityValueMatcher(value);
 
                 return (IRequestMatcher)new FieldMatcher(key, valueMatcher);
             }).ToArray();

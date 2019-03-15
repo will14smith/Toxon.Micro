@@ -76,7 +76,16 @@ namespace Toxon.Micro.Routing
 
             public override bool IsBetterMatchThan(MatchResult other)
             {
-                throw new NotImplementedException();
+                if (other is FieldMatchResult otherField)
+                {
+                    var fieldNameComp = _fieldName.CompareTo(otherField._fieldName);
+
+                    if (fieldNameComp < 0) return true;
+                    if (fieldNameComp == 0) return _fieldMatch.IsBetterMatchThan(otherField._fieldMatch);
+                    return false;
+                }
+
+                return !other.IsBetterMatchThan(this);
             }
         }
     }

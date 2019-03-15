@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Toxon.Micro.Routing;
@@ -9,14 +7,14 @@ namespace Toxon.Micro
 {
     public class Host
     {
-        private readonly List<RequestHandler> _handlers = new List<RequestHandler>();
+        private readonly Router<Func<IRequest, Task<IResponse>>> _router = new Router<Func<IRequest, Task<IResponse>>>();
         private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings();
 
-        public void Add(IRequestMatcher requestMatcher, Func<IRequest, Task<IResponse>> handler)
+        public void Add(IRequestMatcher router, Func<IRequest, Task<IResponse>> handler)
         {
-            _handlers.Add(new RequestHandler(requestMatcher, handler));
+            _router.Add(router, handler);
         }
-        public void Add<TRequest>(IRequestMatcher requestMatcher, Func<TRequest, Task<IResponse>> handler)
+        public void Add<TRequest>(IRequestMatcher router, Func<TRequest, Task<IResponse>> handler)
             where TRequest : IRequest
         {
             Task<IResponse> WrappedHandler(IRequest rawRequest)
@@ -32,37 +30,18 @@ namespace Toxon.Micro
                 return handler(request);
             }
 
-            _handlers.Add(new RequestHandler(requestMatcher, WrappedHandler));
+            _router.Add(router, WrappedHandler);
         }
 
         public Task<IResponse> Act(IRequest request)
         {
-            RequestHandler chosenHandler = null;
-            MatchResult chosenHandlerMatch = null;
-
-            foreach (var handler in _handlers)
-            {
-                var handlerMatch = handler.RequestMatcher.Matches(request);
-                if (!handlerMatch.Matched)
-                {
-                    continue;
-                }
-
-                if (chosenHandler != null && !handlerMatch.IsBetterMatchThan(chosenHandlerMatch))
-                {
-                    continue;
-                }
-
-                chosenHandler = handler;
-                chosenHandlerMatch = handlerMatch;
-            }
-
+            var chosenHandler = _router.Match(request);
             if (chosenHandler == null)
             {
                 throw new Exception("Handler not found");
             }
 
-            return chosenHandler.Handler(request);
+            return chosenHandler(request);
         }
         public async Task<TResponse> Act<TResponse>(IRequest request)
             where TResponse : IResponse
@@ -81,17 +60,5 @@ namespace Toxon.Micro
 
         private string Serialize(object value) => JsonConvert.SerializeObject(value, _serializerSettings);
         private T Deserialize<T>(string serialized) => JsonConvert.DeserializeObject<T>(serialized, _serializerSettings);
-    }
-
-    internal class RequestHandler
-    {
-        public RequestHandler(IRequestMatcher requestMatcher, Func<IRequest, Task<IResponse>> handler)
-        {
-            RequestMatcher = requestMatcher;
-            Handler = handler;
-        }
-
-        public IRequestMatcher RequestMatcher { get; }
-        public Func<IRequest, Task<IResponse>> Handler { get; }
     }
 }
