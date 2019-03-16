@@ -37,7 +37,18 @@ namespace Toxon.Micro.Transport
                         Console.WriteLine($"Received message: {bodyString}");
 
                         var req = host.Deserialize<IReadOnlyDictionary<string, object>>(bodyString);
-                        var resp = await host.Act(new DictionaryRequest(req));
+
+                        object resp = null;
+                        try
+                        {
+                            resp = await host.Act(new DictionaryRequest(req));
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine($"Error handling request: ${ex.Message}");
+                            Console.ResetColor();
+                        }
 
                         context.Response.Headers.Add("Content-Type", "application/json");
                         var responseString = host.Serialize(resp);
@@ -59,7 +70,7 @@ namespace Toxon.Micro.Transport
             }
 
             var client = new HttpClient { BaseAddress = httpConfig.BaseUri };
-            
+
             host.Add(message.Config.Pin, async request =>
             {
                 var serializedRequest = host.Serialize(request);

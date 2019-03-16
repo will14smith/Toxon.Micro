@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -58,7 +57,7 @@ namespace Toxon.Micro
 
             if (!hasConsumedMatch)
             {
-                throw new Exception("Consuming handler was not found");
+                throw new NotMatchingHandlerException(request);
             }
 
             return result;
@@ -66,48 +65,5 @@ namespace Toxon.Micro
 
         internal string Serialize(object value) => JsonConvert.SerializeObject(value, _serializerSettings);
         internal T Deserialize<T>(string serialized) => JsonConvert.DeserializeObject<T>(serialized, _serializerSettings);
-    }
-
-    public class RouteHandler
-    {
-        public RouteHandler(Func<IRequest, RequestMeta, Task<object>> handler, RouteMode mode = RouteMode.Consume)
-        {
-            Handler = handler;
-            Mode = mode;
-        }
-
-        public RouteMode Mode { get; }
-        public Func<IRequest, RequestMeta, Task<object>> Handler { get; }
-    }
-
-    public enum RouteMode
-    {
-        Consume,
-        Observe
-    }
-
-    public class RequestMeta
-    {
-        private readonly IReadOnlyList<RouteHandler> _remainingConsumeMatches;
-
-        public RequestMeta(IReadOnlyList<RouteHandler> remainingConsumeMatches)
-        {
-            _remainingConsumeMatches = remainingConsumeMatches;
-        }
-
-        public bool TryPrior(IRequest request, out Task<object> prior)
-        {
-            if (_remainingConsumeMatches.Count <= 1)
-            {
-                prior = null;
-                return false;
-            }
-
-            var priorMatch = _remainingConsumeMatches[1];
-            var newPriors = _remainingConsumeMatches.Skip(1).ToList();
-
-            prior = priorMatch.Handler(request, new RequestMeta(newPriors));
-            return true;
-        }
     }
 }

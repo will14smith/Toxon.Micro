@@ -14,6 +14,7 @@ namespace Toxon.Micro.Blog.Front
                 .WithTransport()
                 .Client(new HttpClientConfig(new Uri("http://localhost:8601")) { Pin = "store:*,kind:entry" })
                 .Client(new HttpClientConfig(new Uri("http://localhost:8602")) { Pin = "post:*" })
+                .Client(new HttpClientConfig(new Uri("http://localhost:8603")) { Pin = "search:*" })
             ;
 
             new WebHostBuilder()
