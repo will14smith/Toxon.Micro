@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Toxon.Micro.Routing
 {
@@ -26,6 +27,11 @@ namespace Toxon.Micro.Routing
             }
 
             return new AndMatchResult(results);
+        }
+
+        public override string ToString()
+        {
+            return $"&& {string.Join(" ", _requestMatchers.Select(x => $"({x})"))}";
         }
 
         private class AndMatchResult : MatchResult

@@ -78,6 +78,11 @@ namespace Toxon.Micro.Routing
             return FieldName.Equals(fieldName, StringComparison.InvariantCultureIgnoreCase);
         }
 
+        public override string ToString()
+        {
+            return $"{FieldName} = {FieldValue}";
+        }
+
         private class FieldMatchResult : MatchResult
         {
             private readonly string _fieldName;

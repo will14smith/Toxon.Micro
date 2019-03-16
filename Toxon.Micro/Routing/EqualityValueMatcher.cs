@@ -27,6 +27,11 @@ namespace Toxon.Micro.Routing
             return new EqualityValueMatchResult();
         }
 
+        public override string ToString()
+        {
+            return MatchValue?.ToString() ?? "null";
+        }
+
         private class EqualityValueMatchResult : MatchResult
         {
             public override bool IsBetterMatchThan(MatchResult other)

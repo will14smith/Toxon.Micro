@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Toxon.Micro.Transport
 {
@@ -36,11 +34,16 @@ namespace Toxon.Micro.Transport
                         var body = context.Request.Body;
                         var bodyString = await new StreamReader(body).ReadToEndAsync();
 
+                        Console.WriteLine($"Received message: {bodyString}");
+
                         var req = host.Deserialize<IReadOnlyDictionary<string, object>>(bodyString);
                         var resp = await host.Act(new DictionaryRequest(req));
 
                         context.Response.Headers.Add("Content-Type", "application/json");
-                        await context.Response.WriteAsync(host.Serialize(resp));
+                        var responseString = host.Serialize(resp);
+                        await context.Response.WriteAsync(responseString);
+
+                        Console.WriteLine($"Response message: {responseString}");
                     });
                 })
                 .Start();
@@ -60,14 +63,20 @@ namespace Toxon.Micro.Transport
             host.Add(message.Config.Pin, async request =>
             {
                 var serializedRequest = host.Serialize(request);
+
+                Console.WriteLine($"Sending message: {serializedRequest}");
+
                 var content = Encoding.UTF8.GetBytes(serializedRequest);
 
                 var httpResponse = await client.PostAsync("/", new ByteArrayContent(content));
                 var serializedResponse = await httpResponse.Content.ReadAsStringAsync();
 
-                var response = host.Deserialize<IReadOnlyDictionary<string, object>>(serializedResponse);
+                Console.WriteLine($"Received response message: {serializedResponse}");
+
+                var response = host.Deserialize<object>(serializedResponse);
+
                 return response;
-            });
+            }, message.Config.Mode);
 
             return Task.FromResult<object>(null);
         }
@@ -87,12 +96,14 @@ namespace Toxon.Micro.Transport
 
         public static Host Listen(this Host host, TransportListenConfig config)
         {
+            // TODO await
             host.Act(new TransportListenCommand { Config = config });
 
             return host;
         }
         public static Host Client(this Host host, TransportClientConfig config)
         {
+            // TODO await
             host.Act(new TransportClientCommand { Config = config });
 
             return host;
@@ -125,5 +136,6 @@ namespace Toxon.Micro.Transport
     {
         public abstract string Type { get; }
         public string Pin { get; set; }
+        public RouteMode Mode { get; set; } = RouteMode.Consume;
     }
 }
