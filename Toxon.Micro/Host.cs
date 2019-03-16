@@ -18,6 +18,16 @@ namespace Toxon.Micro
             return this;
         }
 
+        public async Task Broadcast(IRequest request)
+        {
+            var matches = _router.Matches(request);
+
+            foreach (var match in matches)
+            {
+                await match.Handler(request, new RequestMeta(new RouteHandler[0]));
+            }
+        }
+
         public async Task<object> Act(IRequest request)
         {
             var matches = _router.Matches(request);
