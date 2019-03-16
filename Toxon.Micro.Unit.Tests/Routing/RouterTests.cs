@@ -17,10 +17,10 @@ namespace Toxon.Micro.Unit.Tests.Routing
         public void TestEqualityPatterns(int? x, int? y, string expected)
         {
             var router = new Router<string>();
-            router.Add(RouterPatternParser.Parse("x:1"), "A");
-            router.Add(RouterPatternParser.Parse("x:1,y:1"), "B");
-            router.Add(RouterPatternParser.Parse("x:1,y:2"), "C");
-            router.Add(RouterPatternParser.Parse("y:2"), "D");
+            router.Add("x:1", "A");
+            router.Add("x:1,y:1", "B");
+            router.Add("x:1,y:2", "C");
+            router.Add("y:2", "D");
 
             var response = router.Match(new Request1 { X = x?.ToString(), Y = y?.ToString() });
 
@@ -38,10 +38,10 @@ namespace Toxon.Micro.Unit.Tests.Routing
         public void TestOrdering(int? a, int? b, int? c, string expected)
         {
             var router = new Router<string>();
-            router.Add(RouterPatternParser.Parse("a:0"), "A");
-            router.Add(RouterPatternParser.Parse("b:1"), "B");
-            router.Add(RouterPatternParser.Parse("c:2"), "C");
-            router.Add(RouterPatternParser.Parse("a:0,b:1"), "AB");
+            router.Add("a:0", "A");
+            router.Add("b:1", "B");
+            router.Add("c:2", "C");
+            router.Add("a:0,b:1", "AB");
 
             var response = router.Match(new Request2
             {
@@ -61,9 +61,9 @@ namespace Toxon.Micro.Unit.Tests.Routing
         public void TestOrderingGlob(int? a, int? b, string c, string expected)
         {
             var router = new Router<string>();
-            router.Add(RouterPatternParser.Parse("a:0"), "A");
-            router.Add(RouterPatternParser.Parse("a:*"), "AA");
-            router.Add(RouterPatternParser.Parse("b:1,c:x*y"), "BC");
+            router.Add("a:0", "A");
+            router.Add("a:*", "AA");
+            router.Add("b:1,c:x*y", "BC");
 
             var response = router.Match(new Request2
             {
