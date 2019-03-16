@@ -5,9 +5,9 @@ using Toxon.Micro.Routing;
 
 namespace Toxon.Micro.Example
 {
-    public class Program
+    public class Program1
     {
-        public static async Task Main(string[] args)
+        public static async Task __Main(string[] args)
         {
             var host = new Host();
 
@@ -20,7 +20,7 @@ namespace Toxon.Micro.Example
                 var total = request.Net * (1 + rate);
 
                 var response = new TaxResponse(total);
-                return Task.FromResult<IResponse>(response);
+                return Task.FromResult<object>(response);
             });
 
             host.Add<USTaxRequest>(new AndMatcher(salestax, Country("US")), request =>
@@ -35,7 +35,7 @@ namespace Toxon.Micro.Example
                 var total = request.Net * (1 + rate);
 
                 var response = new TaxResponse(total);
-                return Task.FromResult<IResponse>(response);
+                return Task.FromResult<object>(response);
             });
 
             host.Add<IETaxRequest>(new AndMatcher(salestax, Country("IE")), request =>
@@ -50,7 +50,7 @@ namespace Toxon.Micro.Example
                 var total = request.Net * (1 + rate);
 
                 var response = new TaxResponse(total);
-                return Task.FromResult<IResponse>(response);
+                return Task.FromResult<object>(response);
             });
 
             var deResponse = await host.Act<TaxResponse>(new TaxRequest { Country = "DE", Net = 100 });
@@ -64,42 +64,42 @@ namespace Toxon.Micro.Example
 
             Console.ReadLine();
         }
-    }
 
-    public class TaxRequest : IRequest
-    {
-        public string Cmd => "salestax";
-
-        public string Country { get; set; }
-
-        public decimal Net { get; set; }
-    }
-    public class USTaxRequest : IRequest
-    {
-        public string Cmd => "salestax";
-
-        public string Country => "US";
-        public string State { get; set; }
-
-        public decimal Net { get; set; }
-    }
-    public class IETaxRequest : IRequest
-    {
-        public string Cmd => "salestax";
-
-        public string Country => "IE";
-        public string Category { get; set; }
-
-        public decimal Net { get; set; }
-    }
-
-    public class TaxResponse : IResponse
-    {
-        public decimal Total { get; }
-
-        public TaxResponse(decimal total)
+        public class TaxRequest : IRequest
         {
-            Total = total;
+            public string Cmd => "salestax";
+
+            public string Country { get; set; }
+
+            public decimal Net { get; set; }
+        }
+        public class USTaxRequest : IRequest
+        {
+            public string Cmd => "salestax";
+
+            public string Country => "US";
+            public string State { get; set; }
+
+            public decimal Net { get; set; }
+        }
+        public class IETaxRequest : IRequest
+        {
+            public string Cmd => "salestax";
+
+            public string Country => "IE";
+            public string Category { get; set; }
+
+            public decimal Net { get; set; }
+        }
+
+        public class TaxResponse
+        {
+            public decimal Total { get; }
+
+            public TaxResponse(decimal total)
+            {
+                Total = total;
+            }
         }
     }
 }

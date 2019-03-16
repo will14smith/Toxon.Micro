@@ -6,38 +6,59 @@ namespace Toxon.Micro
 {
     public static class HostExtensions
     {
-        public static void Add(this Host host, string route, Func<IRequest, Task<IResponse>> handler)
+        public static Host Add(this Host host, IRequestMatcher route, Func<IRequest, Task<object>> handler)
         {
-            host.Add(RouterPatternParser.Parse(route), handler);
+            return host.Add(route, (message, _) => handler(message));
         }
 
-        public static void Add<TRequest>(this Host host, string route, Func<TRequest, Task<IResponse>> handler)
-            where TRequest : IRequest
+        public static Host Add(this Host host, string route, Func<IRequest, Task<object>> handler)
         {
-            host.Add(RouterPatternParser.Parse(route), handler);
+            return host.Add(RouterPatternParser.Parse(route), handler);
         }
 
-        public static void Add<TRequest>(this Host host, IRequestMatcher route, Func<TRequest, Task<IResponse>> handler)
+        public static Host Add(this Host host, string route, Func<IRequest, RequestMeta, Task<object>> handler)
+        {
+            return host.Add(RouterPatternParser.Parse(route), handler);
+        }
+
+        public static Host Add<TRequest>(this Host host, string route, Func<TRequest, Task<object>> handler)
             where TRequest : IRequest
         {
-            Task<IResponse> WrappedHandler(IRequest rawRequest)
+            return host.Add(RouterPatternParser.Parse(route), handler);
+        }
+
+        public static Host Add<TRequest>(this Host host, string route, Func<TRequest, RequestMeta, Task<object>> handler)
+            where TRequest : IRequest
+        {
+            return host.Add(RouterPatternParser.Parse(route), handler);
+        }
+
+        public static Host Add<TRequest>(this Host host, IRequestMatcher route, Func<TRequest, Task<object>> handler)
+            where TRequest : IRequest
+        {
+            return host.Add<TRequest>(route, (message, _) => handler(message));
+        }
+
+        public static Host Add<TRequest>(this Host host, IRequestMatcher route, Func<TRequest, RequestMeta, Task<object>> handler)
+            where TRequest : IRequest
+        {
+            Task<object> WrappedHandler(IRequest rawRequest, RequestMeta meta)
             {
                 if (rawRequest is TRequest request)
                 {
-                    return handler(request);
+                    return handler(request, meta);
                 }
 
                 var serializedRequest = host.Serialize(rawRequest);
                 request = host.Deserialize<TRequest>(serializedRequest);
 
-                return handler(request);
+                return handler(request, meta);
             }
 
-            host.Add(route, WrappedHandler);
+            return host.Add(route, WrappedHandler);
         }
 
         public static async Task<TResponse> Act<TResponse>(this Host host, IRequest request)
-            where TResponse : IResponse
         {
             var rawResponse = await host.Act(request);
             if (rawResponse is TResponse response)

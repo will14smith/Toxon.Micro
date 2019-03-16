@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.489
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toxon.Micro", "Toxon.Micro\Toxon.Micro.csproj", "{2DCDC78C-2D55-4EFC-B19F-2CEE14D0C0D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toxon.Micro", "Toxon.Micro\Toxon.Micro.csproj", "{2DCDC78C-2D55-4EFC-B19F-2CEE14D0C0D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toxon.Micro.Example", "Toxon.Micro.Example\Toxon.Micro.Example.csproj", "{43C32AF6-B439-40BF-BC1B-42AAF4286E84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toxon.Micro.Example", "Toxon.Micro.Example\Toxon.Micro.Example.csproj", "{43C32AF6-B439-40BF-BC1B-42AAF4286E84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toxon.Micro.Unit.Tests", "Toxon.Micro.Unit.Tests\Toxon.Micro.Unit.Tests.csproj", "{DB6E4F4D-4B7C-4184-9C9E-64B6F91ED8B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toxon.Micro.Unit.Tests", "Toxon.Micro.Unit.Tests\Toxon.Micro.Unit.Tests.csproj", "{DB6E4F4D-4B7C-4184-9C9E-64B6F91ED8B6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MicroBlog", "MicroBlog", "{770A2A33-4BD9-4DAE-9055-7F0E7177A953}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

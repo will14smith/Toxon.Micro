@@ -31,7 +31,9 @@ namespace Toxon.Micro.Routing
         {
             public override bool IsBetterMatchThan(MatchResult other)
             {
-                throw new NotImplementedException();
+                if (other is EqualityValueMatchResult) return false;
+
+                return !other.IsBetterMatchThan(this);
             }
         }
     }

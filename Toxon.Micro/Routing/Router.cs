@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Toxon.Micro.Routing
 {
@@ -11,29 +12,26 @@ namespace Toxon.Micro.Routing
             _routes.Add((route, data));
         }
 
-        public TData Match(IRequest request)
+        public IReadOnlyList<TData> Matches(IRequest request)
         {
-            TData chosenData = default;
-            MatchResult chosenMatch = null;
+            return _routes
+                .Select(x => (Match: x.Route.Matches(request), Data: x.Data))
+                .Where(x => x.Match.Matched)
+                .OrderByDescending(x => x.Match, new MatchComparer())
+                .Select(x => x.Data)
+                .ToList();
+        }
+    }
 
-            foreach (var (route, data) in _routes)
-            {
-                var match = route.Matches(request);
-                if (!match.Matched)
-                {
-                    continue;
-                }
+    public class MatchComparer : IComparer<MatchResult>
+    {
+        public int Compare(MatchResult x, MatchResult y)
+        {
+            if (x.IsBetterMatchThan(y)) return 1;
+            if (y.IsBetterMatchThan(x)) return -1;
 
-                if (chosenMatch != null && !match.IsBetterMatchThan(chosenMatch))
-                {
-                    continue;
-                }
+            return 0;
 
-                chosenData = data;
-                chosenMatch = match;
-            }
-
-            return chosenData;
         }
     }
 }

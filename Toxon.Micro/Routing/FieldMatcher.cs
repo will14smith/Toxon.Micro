@@ -19,27 +19,11 @@ namespace Toxon.Micro.Routing
         {
             if (request is null) return MatchResult.NoMatch;
 
-            object requestFieldValue;
-
-            var type = request.GetType();
-            var property = GetProperty(type);
-            if (property != null)
+            if(!Find(request, out var requestFieldValue))
             {
-                requestFieldValue = property.GetValue(request);
+                return MatchResult.NoMatch;
             }
-            else
-            {
-                var field = GetField(type);
-                if (field != null)
-                {
-                    requestFieldValue = field.GetValue(request);
-                }
-                else
-                {
-                    return MatchResult.NoMatch;
-                }
-            }
-
+            
             var fieldMatch = FieldValue.Matches(requestFieldValue);
             if (!fieldMatch.Matched)
             {
@@ -47,6 +31,37 @@ namespace Toxon.Micro.Routing
             }
 
             return new FieldMatchResult(FieldName, fieldMatch);
+        }
+
+        private bool Find(IRequest request, out object result)
+        {
+            if (request is IDynamicRequest dynamicRequest)
+            {
+                var dynamicValueResult = dynamicRequest.LookupValue(FieldName);
+                if (dynamicValueResult.Found)
+                {
+                    result = dynamicValueResult.Value;
+                    return true;
+                }
+            }
+
+            var type = request.GetType();
+            var property = GetProperty(type);
+            if (property != null)
+            {
+                result = property.GetValue(request);
+                return true;
+            }
+
+            var field = GetField(type);
+            if (field != null)
+            {
+                result = field.GetValue(request);
+                return true;
+            }
+
+            result = null;
+            return false;
         }
 
         private FieldInfo GetField(Type type)
