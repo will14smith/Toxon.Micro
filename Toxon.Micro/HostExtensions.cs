@@ -6,40 +6,40 @@ namespace Toxon.Micro
 {
     public static class HostExtensions
     {
-        public static Host Add(this Host host, IRequestMatcher route, Func<IRequest, Task<object>> handler)
+        public static Host Add(this Host host, IRequestMatcher route, Func<IRequest, Task<object>> handler, RouteMode mode = RouteMode.Consume)
         {
-            return host.Add(route, (message, _) => handler(message));
+            return host.Add(route, new RouteHandler((message, _) => handler(message), mode));
         }
 
-        public static Host Add(this Host host, string route, Func<IRequest, Task<object>> handler)
+        public static Host Add(this Host host, string route, Func<IRequest, Task<object>> handler, RouteMode mode = RouteMode.Consume)
         {
-            return host.Add(RouterPatternParser.Parse(route), handler);
+            return host.Add(RouterPatternParser.Parse(route), handler, mode);
         }
 
-        public static Host Add(this Host host, string route, Func<IRequest, RequestMeta, Task<object>> handler)
+        public static Host Add(this Host host, string route, Func<IRequest, RequestMeta, Task<object>> handler, RouteMode mode = RouteMode.Consume)
         {
-            return host.Add(RouterPatternParser.Parse(route), handler);
+            return host.Add(RouterPatternParser.Parse(route), handler, mode);
         }
 
-        public static Host Add<TRequest>(this Host host, string route, Func<TRequest, Task<object>> handler)
+        public static Host Add<TRequest>(this Host host, string route, Func<TRequest, Task<object>> handler, RouteMode mode = RouteMode.Consume)
             where TRequest : IRequest
         {
-            return host.Add(RouterPatternParser.Parse(route), handler);
+            return host.Add(RouterPatternParser.Parse(route), handler, mode);
         }
 
-        public static Host Add<TRequest>(this Host host, string route, Func<TRequest, RequestMeta, Task<object>> handler)
+        public static Host Add<TRequest>(this Host host, string route, Func<TRequest, RequestMeta, Task<object>> handler, RouteMode mode = RouteMode.Consume)
             where TRequest : IRequest
         {
-            return host.Add(RouterPatternParser.Parse(route), handler);
+            return host.Add(RouterPatternParser.Parse(route), handler, mode);
         }
 
-        public static Host Add<TRequest>(this Host host, IRequestMatcher route, Func<TRequest, Task<object>> handler)
+        public static Host Add<TRequest>(this Host host, IRequestMatcher route, Func<TRequest, Task<object>> handler, RouteMode mode = RouteMode.Consume)
             where TRequest : IRequest
         {
-            return host.Add<TRequest>(route, (message, _) => handler(message));
+            return host.Add<TRequest>(route, (message, _) => handler(message), mode);
         }
 
-        public static Host Add<TRequest>(this Host host, IRequestMatcher route, Func<TRequest, RequestMeta, Task<object>> handler)
+        public static Host Add<TRequest>(this Host host, IRequestMatcher route, Func<TRequest, RequestMeta, Task<object>> handler, RouteMode mode = RouteMode.Consume)
             where TRequest : IRequest
         {
             Task<object> WrappedHandler(IRequest rawRequest, RequestMeta meta)
@@ -55,7 +55,7 @@ namespace Toxon.Micro
                 return handler(request, meta);
             }
 
-            return host.Add(route, WrappedHandler);
+            return host.Add(route, new RouteHandler(WrappedHandler, mode));
         }
 
         public static async Task<TResponse> Act<TResponse>(this Host host, IRequest request)

@@ -9,51 +9,94 @@ namespace Toxon.Micro
 {
     public class Host
     {
-        private readonly Router<Func<IRequest, RequestMeta, Task<object>>> _router = new Router<Func<IRequest, RequestMeta, Task<object>>>();
+        private readonly Router<RouteHandler> _router = new Router<RouteHandler>();
         private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings();
 
-        public Host Add(IRequestMatcher route, Func<IRequest, RequestMeta, Task<object>> handler)
+        public Host Add(IRequestMatcher route, RouteHandler handler)
         {
             _router.Add(route, handler);
             return this;
         }
 
-        public Task<object> Act(IRequest request)
+        public async Task<object> Act(IRequest request)
         {
             var matches = _router.Matches(request);
-            if (matches.Count == 0)
+
+            var hasConsumedMatch = false;
+            object result = default;
+
+            foreach (var match in matches)
             {
-                throw new Exception("Handler not found");
+                switch (match.Mode)
+                {
+                    case RouteMode.Consume:
+                        if (hasConsumedMatch) continue;
+
+                        var remainingConsumeMatches = matches.Where(x => x.Mode == RouteMode.Consume).Skip(1).ToList();
+                        result = await match.Handler(request, new RequestMeta(remainingConsumeMatches));
+
+                        hasConsumedMatch = true;
+                        break;
+
+                    case RouteMode.Observe:
+                        await match.Handler(request, new RequestMeta(new RouteHandler[0]));
+                        break;
+
+                    default: throw new ArgumentOutOfRangeException();
+                }
             }
 
-            return matches.First()(request, new RequestMeta(matches));
+            if (!hasConsumedMatch)
+            {
+                throw new Exception("Consuming handler was not found");
+            }
+
+            return result;
         }
 
         internal string Serialize(object value) => JsonConvert.SerializeObject(value, _serializerSettings);
         internal T Deserialize<T>(string serialized) => JsonConvert.DeserializeObject<T>(serialized, _serializerSettings);
     }
 
+    public class RouteHandler
+    {
+        public RouteHandler(Func<IRequest, RequestMeta, Task<object>> handler, RouteMode mode = RouteMode.Consume)
+        {
+            Handler = handler;
+            Mode = mode;
+        }
+
+        public RouteMode Mode { get; }
+        public Func<IRequest, RequestMeta, Task<object>> Handler { get; }
+    }
+
+    public enum RouteMode
+    {
+        Consume,
+        Observe
+    }
+
     public class RequestMeta
     {
-        private readonly IReadOnlyList<Func<IRequest, RequestMeta, Task<object>>> _matches;
+        private readonly IReadOnlyList<RouteHandler> _remainingConsumeMatches;
 
-        public RequestMeta(IReadOnlyList<Func<IRequest, RequestMeta, Task<object>>> matches)
+        public RequestMeta(IReadOnlyList<RouteHandler> remainingConsumeMatches)
         {
-            _matches = matches;
+            _remainingConsumeMatches = remainingConsumeMatches;
         }
 
         public bool TryPrior(IRequest request, out Task<object> prior)
         {
-            if (_matches.Count <= 1)
+            if (_remainingConsumeMatches.Count <= 1)
             {
                 prior = null;
                 return false;
             }
 
-            var priorMatch = _matches[1];
-            var newPriors = _matches.Skip(1).ToList();
+            var priorMatch = _remainingConsumeMatches[1];
+            var newPriors = _remainingConsumeMatches.Skip(1).ToList();
 
-            prior = priorMatch(request, new RequestMeta(newPriors));
+            prior = priorMatch.Handler(request, new RequestMeta(newPriors));
             return true;
         }
     }
